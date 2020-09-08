@@ -24,4 +24,4 @@ If you ask me why i do this when other people have created the same thing, let m
 - Chromium, in case its not already preinstalled
 - Docker
 
-# FINALLY GET OUT THIS AND CONTINUE YOUR LIFE
+# FINALLY GET OUT AND CONTINUE YOUR LIFE
