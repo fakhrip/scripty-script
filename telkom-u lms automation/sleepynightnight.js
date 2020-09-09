@@ -56,3 +56,6 @@ nightmare
     .then(cookie => {
         console.log("Cookie: " + JSON.stringify(cookie))
     })
+    .catch(_ => {
+      console.log('[!] Login failed')
+    })
