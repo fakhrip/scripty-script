@@ -50,8 +50,11 @@ def menu() :
     """
     print(TEMPLATE, end='')
 
-    inp = int(input('\r[+] Choose menu (1-6) = '))
-    return inp
+    try:
+        inp = int(input('\r[+] Choose menu (1-6) = '))
+        return inp
+    except:
+        return 0
 
 def clear():  
     _ = call('clear' if os.name =='posix' else 'cls') 
@@ -157,12 +160,12 @@ class User :
         \r   Category = {}
         """
 
-        print('===================================================================', end='')
+        print('===================================================================')
         if len(self.__courses) <= 0 :
             print('[+] Sadly, you\'re not currently enrolled to any course :(')
         else :
             for data in self.__courses :
-                print(TEMPLATE.format(data['fullname'], data['shortname'], data['coursecategory']))
+                print(TEMPLATE.format(data['fullname'], data['shortname'], data['coursecategory']), end='')
         print('===================================================================')
 
     def setAllCourses(self, courses) :
