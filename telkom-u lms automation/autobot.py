@@ -50,7 +50,7 @@ def menu() :
     """
     print(TEMPLATE, end='')
 
-    inp = int(input('\r[+] Choose menu (1-5) = '))
+    inp = int(input('\r[+] Choose menu (1-6) = '))
     return inp
 
 def clear():  
