@@ -228,9 +228,6 @@ class Web :
             value  = cookie
         )
         self.__session.cookies.set_cookie(cookie_obj)
-        
-        print('[+] Parsing api key...')
-        self.parseApiKey()
 
     def parseApiKey(self) :
         """Parse api key (or in this case session key) from homepage html."""
@@ -241,8 +238,13 @@ class Web :
             try:
                 chosen_inp = hidden_inp[0]
                 self.__apikey = chosen_inp.attrs['value']
+                return True
             except :
                 print('[!] Error parsing API key')
+                return False
+        else :
+            print('[!] Error parsing API key')
+            return False
         
     def parseCourses(self, user) :
         """
@@ -293,44 +295,50 @@ def main() :
     if sessionCookie :
         process = Web(sessionCookie)
         
-        while True :
-            welcome(username, sessionCookie)
+        print('[+] Parsing api key...')
 
-            inp = show('menu')
-            if inp == 1 :
-                # Parse all courses
-                process.parseCourses(currentUser)
+        if process.parseApiKey() :
+            while True :
+                welcome(username, sessionCookie)
+
+                inp = show('menu')
+                if inp == 1 :
+                    # Parse all courses
+                    process.parseCourses(currentUser)
+                    
+                    if currentUser.getAllCourses() != None :
+                        currentUser.printAllCourses()
+
+                elif inp == 2 :
+                    # Access one of the course
+                    print('[+] access course')
+
+                elif inp == 3 :
+                    # Parse all my messages
+                    print('[+] parse message')
+
+                elif inp == 4 :
+                    # Parse all event in this month
+                    print('[+] parse events')
+
+                elif inp == 5 :
+                    # Logout current account
+                    print('[+] logout')
+
+                elif inp == 6 :
+                    # Exit the app
+                    print('[#] Thanks for using this app :D')
+                    break
+
+                else :
+                    # Input is out of range
+                    print('[!] Wrong input...')
                 
-                if currentUser.getAllCourses() != None :
-                    currentUser.printAllCourses()
-
-            elif inp == 2 :
-                # Access one of the course
-                print('[+] access course')
-
-            elif inp == 3 :
-                # Parse all my messages
-                print('[+] parse message')
-
-            elif inp == 4 :
-                # Parse all event in this month
-                print('[+] parse events')
-
-            elif inp == 5 :
-                # Logout current account
-                print('[+] logout')
-
-            elif inp == 6 :
-                # Exit the app
-                print('[#] Thanks for using this app :D')
-                break
-
-            else :
-                # Input is out of range (1-5)
-                print('[!] Wrong input...')
-            
-            pause()
-
+                pause()
+        else :
+            # Couldn't parse the api key, terminate app
+            print('[!] Try running the script again.')
+            print('    If the problem persist, contact the creator.')
     else :
         # Couldn't log the user in, terminate app
         print('[!] Try running the script again, if you think you\'ve solved the problem.')
