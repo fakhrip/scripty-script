@@ -315,7 +315,7 @@ def main() :
 
                 elif inp == 3 :
                     # Parse all my messages
-                    print('[+] parse message')
+                    print('[+] This feature have not created yet (might even won\'t :v)')
 
                 elif inp == 4 :
                     # Parse all event in this month
