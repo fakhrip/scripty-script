@@ -105,7 +105,15 @@ class User :
         return self.__cookie
 
     def generateSessionCookie(self) :
-        """Generate session cookie based on username and password."""
+        """
+        Generate session cookie based on username and password.
+        
+        Returns
+        -------
+        Str : If Succeed
+            Cookie string
+        None : Else
+        """
         print('[+] Logging in... (Please wait, this will take a while).')
         result = check_output([
             'node', 
@@ -155,18 +163,18 @@ class User :
     def printAllCourses(self) :
         """Fancy print all the courses."""
         TEMPLATE = """
-        \r - Course fullname = {}
-        \r   Course shortname = {}
-        \r   Category = {}
+        \r {}. Course fullname = {}
+        \r    Course shortname = {}
+        \r    Category = {}
         """
 
-        print('===================================================================')
+        print('\r===================================================================')
         if len(self.__courses) <= 0 :
             print('[+] Sadly, you\'re not currently enrolled to any course :(')
         else :
-            for data in self.__courses :
-                print(TEMPLATE.format(data['fullname'], data['shortname'], data['coursecategory']), end='')
-        print('===================================================================')
+            for i, data in enumerate(self.__courses) :
+                print(TEMPLATE.format(i+1, data['fullname'], data['shortname'], data['coursecategory']), end='')
+        print('\r\n===================================================================')
 
     def setAllCourses(self, courses) :
         self.__courses = courses
@@ -232,8 +240,32 @@ class Web :
         )
         self.__session.cookies.set_cookie(cookie_obj)
 
+    def logout(self) :
+        """
+        Log current user out.
+
+        Returns
+        -------
+        Boolean
+            True if succeed, otherwise False
+        """
+        res = self.__session.get(self.BASE_DOMAIN.format(self.GET_URL['logout']))
+        if self.BASE_DOMAIN.format(self.GET_URL['home']) in res.text :
+            self.__session = ''
+            self.__apikey = ''            
+            return True
+        else :
+            return False
+
     def parseApiKey(self) :
-        """Parse api key (or in this case session key) from homepage html."""
+        """
+        Parse api key (or in this case session key) from homepage html.
+        
+        Returns
+        -------
+        Boolean
+            True if succeed, otherwise False
+        """
         res = self.__session.get(self.BASE_DOMAIN.format(self.GET_URL['home']))
         soup = BeautifulSoup(res.text, 'html.parser')
         hidden_inp = soup.find_all(attrs={"name": "sesskey"})
@@ -342,7 +374,8 @@ def main() :
         print('[+] Parsing api key...')
 
         if process.parseApiKey() :
-            while True :
+            logout = False
+            while not logout :
                 welcome(username, sessionCookie)
 
                 inp = show('menu')
@@ -367,7 +400,11 @@ def main() :
 
                 elif inp == 5 :
                     # Logout current account
-                    print('[+] logout')
+                    if process.logout() :
+                        logout = True
+                        print('[+] Logout successfully')
+                    else :
+                        print('[!] Logout failed...')
 
                 elif inp == 6 :
                     # Exit the app
@@ -379,6 +416,8 @@ def main() :
                     print('[!] Wrong input...')
                 
                 pause()
+            else :
+                main() # User logout, back to login screen
         else :
             # Couldn't parse the api key, terminate app
             print('[!] Try running the script again.')
