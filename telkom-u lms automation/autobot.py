@@ -359,6 +359,15 @@ class Web :
         except ValueError:
             print('[!] Failed to decode the resulted json.')
 
+def ask_retry() :
+    retry = str(input('\r[#] Retry ? (y/n)'))
+    if retry == 'y' :
+        main()
+    elif retry == 'n' : 
+        return
+    else :
+        ask_retry()
+
 def main() :
     show('hello')
 
@@ -423,8 +432,8 @@ def main() :
             print('[!] Try running the script again.')
             print('    If the problem persist, contact the creator.')
     else :
-        # Couldn't log the user in, terminate app
-        print('[!] Try running the script again, if you think you\'ve solved the problem.')
+        # Couldn't log the user in, ask for retry
+        ask_retry()
 
 if __name__ == "__main__":
     main()
