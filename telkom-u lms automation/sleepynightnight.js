@@ -23,7 +23,7 @@ if (args.includes('--help')) {
 }
 
 var allOption = { 
-    waitTimeout: 30000,
+    waitTimeout: 15000,
     typeInterval: 20,
 }
 
