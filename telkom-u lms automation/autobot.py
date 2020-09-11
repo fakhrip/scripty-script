@@ -201,8 +201,8 @@ class Web :
             "methodname": "core_calendar_get_action_events_by_timesort",\
             "args": {\
                 "limitnum": 20,\
-                "timesortfrom": {from},\
-                "timesortto": {to},\
+                "timesortfrom": {from_time},\
+                "timesortto": {to_time},\
                 "limittononsuspendedevents": true\
             }\
         }]',
@@ -275,7 +275,7 @@ class Web :
                 courses = [{
                     'fullname': x['fullname'].replace('\n', ' '),
                     'shortname': x['shortname'],
-                    'idnumber': x['idnumber'],
+                    'course_id': x['id'],
                     'viewurl': x['viewurl'],
                     'coursecategory': x['coursecategory']
                 } for x in courses]
@@ -283,6 +283,47 @@ class Web :
                 user.setAllCourses(courses)
             else :
                 print('[!] Error fetching courses data.')
+        except ValueError:
+            print('[!] Failed to decode the resulted json.')
+
+    def parseEvents(self, user, from_time, to_time) :
+        """
+        Parse all user events with range
+        of 2 timestamps.
+
+        Parameters
+        ----------
+        user: User
+            current user class object
+        from_time: int
+            timestamp of starting date
+        to_time: int
+            timestamp of ending date
+        """
+        event_url = self.POST_URL['events'].format(apikey = self.__apikey)
+        event_data = self.POST_DATA['events'].format(from_time = from_time, to_time = to_time)
+        res = self.__session.post(self.BASE_DOMAIN.format(event_url), data = event_data)
+
+        try:
+            resJson = json.loads(res.text)
+
+            result = resJson[0]
+            isError = result['error']
+
+            if not isError :
+                # Filter out only important data
+                data = result['data']
+                events = data['events']
+                events = [{
+                    'id': x['id'],
+                    'name': x['name'],
+                    'course_id': x['course']['id'],
+                    'viewurl': x['viewurl'],
+                } for x in events]
+
+                user.setAllCourses(courses)
+            else :
+                print('[!] Error fetching events data.')
         except ValueError:
             print('[!] Failed to decode the resulted json.')
 
