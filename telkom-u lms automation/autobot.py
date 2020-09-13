@@ -37,7 +37,8 @@ def hello() :
     """
     print(TEMPLATE, end='')
 
-def menu() :
+def menu(what = 'default') :
+    
     TEMPLATE = """
     \r===================================================================
     \r| [1] All my courses                                              |
