@@ -6,14 +6,15 @@ LICENSE   -> MIT, see LICENSE for more details.
 """
 
 from subprocess import check_output
-from subprocess import call 
+from subprocess import call
 from bs4 import BeautifulSoup
 import stdiomask
 import requests
 import json
 import os
 
-def hello() :
+
+def hello():
     clear()
 
     TEMPLATE = """
@@ -37,8 +38,9 @@ def hello() :
     """
     print(TEMPLATE, end='')
 
-def menu(what = 'default') :
-    
+
+def menu(what='default'):
+
     TEMPLATE = """
     \r===================================================================
     \r| [1] All my courses                                              |
@@ -57,15 +59,18 @@ def menu(what = 'default') :
     except:
         return 0
 
-def clear():  
-    _ = call('clear' if os.name =='posix' else 'cls') 
 
-def pause() :
+def clear():
+    _ = call('clear' if os.name == 'posix' else 'cls')
+
+
+def pause():
     input("[#] Press Enter to continue...")
 
-def welcome(fullname, sessionCookie) :
+
+def welcome(fullname, sessionCookie):
     clear()
-    
+
     TEMPLATE = """
     \r===================================================================
     \r Welcome, {}
@@ -74,14 +79,16 @@ def welcome(fullname, sessionCookie) :
     """
     print(TEMPLATE.format(fullname, sessionCookie), end='')
 
-def show(what) :
-    if what == 'hello' :
+
+def show(what):
+    if what == 'hello':
         hello()
-    elif what == 'menu' :
+    elif what == 'menu':
         ret_code = menu()
         return ret_code
 
-class User :
+
+class User:
     """
     User class for saving and generating user profiles
     and all the meta.
@@ -97,18 +104,18 @@ class User :
     __password = ''
     __cookie = ''
 
-    def __init__(self, username, password) :
+    def __init__(self, username, password):
         self.__username = username
         self.__password = password
 
-    def getSessionCookie(self) :
+    def getSessionCookie(self):
         """Get session cookie based on username and password."""
         return self.__cookie
 
-    def generateSessionCookie(self) :
+    def generateSessionCookie(self):
         """
         Generate session cookie based on username and password.
-        
+
         Returns
         -------
         Str : If Succeed
@@ -117,13 +124,13 @@ class User :
         """
         print('[+] Logging in... (Please wait, this will take a while).')
         result = check_output([
-            'node', 
-            'sleepynightnight.js', 
-            self.__username, 
+            'node',
+            'sleepynightnight.js',
+            self.__username,
             self.__password,
         ])
 
-        if b'Cookie:' in result :
+        if b'Cookie:' in result:
             result = result.split(b'Cookie: ')[1]
 
             try:
@@ -141,7 +148,7 @@ class User :
 
         return None
 
-    def addCourse(self, course) :
+    def addCourse(self, course):
         """
         Add course to current all courses array.
 
@@ -155,13 +162,13 @@ class User :
         Boolean
             True if succeed, otherwise False
         """
-        if self.__courses :
+        if self.__courses:
             self.__courses.append(course)
             return True
-        else : 
+        else:
             return False
 
-    def printAllCourses(self) :
+    def printAllCourses(self):
         """Fancy print all the courses."""
         TEMPLATE = """
         \r {}. Course fullname = {}
@@ -170,20 +177,22 @@ class User :
         """
 
         print('\r===================================================================')
-        if len(self.__courses) <= 0 :
+        if len(self.__courses) <= 0:
             print('[+] Sadly, you\'re not currently enrolled to any course :(')
-        else :
-            for i, data in enumerate(self.__courses) :
-                print(TEMPLATE.format(i+1, data['fullname'], data['shortname'], data['coursecategory']), end='')
+        else:
+            for i, data in enumerate(self.__courses):
+                print(TEMPLATE.format(
+                    i+1, data['fullname'], data['shortname'], data['coursecategory']), end='')
         print('\r\n===================================================================')
 
-    def setAllCourses(self, courses) :
+    def setAllCourses(self, courses):
         self.__courses = courses
 
-    def getAllCourses(self) :
+    def getAllCourses(self):
         return self.__courses
 
-class Web :
+
+class Web:
     """
     Web class for saving session and all the state.
 
@@ -191,7 +200,7 @@ class Web :
     ----------
     cookie : str
         Cookie of corresponding credential
-    """    
+    """
     BASE_DOMAIN = 'https://lms.telkomuniversity.ac.id{}'
 
     GET_URL = {
@@ -232,16 +241,16 @@ class Web :
     __session = ''
     __apikey = ''
 
-    def __init__(self, cookie) :
+    def __init__(self, cookie):
         self.__session = requests.Session()
         cookie_obj = requests.cookies.create_cookie(
-            domain = 'lms.telkomuniversity.ac.id',
-            name   = 'MoodleSession',
-            value  = cookie
+            domain='lms.telkomuniversity.ac.id',
+            name='MoodleSession',
+            value=cookie
         )
         self.__session.cookies.set_cookie(cookie_obj)
 
-    def logout(self) :
+    def logout(self):
         """
         Log current user out.
 
@@ -250,18 +259,19 @@ class Web :
         Boolean
             True if succeed, otherwise False
         """
-        res = self.__session.get(self.BASE_DOMAIN.format(self.GET_URL['logout']))
-        if self.BASE_DOMAIN.format(self.GET_URL['home']) in res.text :
+        res = self.__session.get(
+            self.BASE_DOMAIN.format(self.GET_URL['logout']))
+        if self.BASE_DOMAIN.format(self.GET_URL['home']) in res.text:
             self.__session = ''
-            self.__apikey = ''            
+            self.__apikey = ''
             return True
-        else :
+        else:
             return False
 
-    def parseApiKey(self) :
+    def parseApiKey(self):
         """
         Parse api key (or in this case session key) from homepage html.
-        
+
         Returns
         -------
         Boolean
@@ -270,19 +280,19 @@ class Web :
         res = self.__session.get(self.BASE_DOMAIN.format(self.GET_URL['home']))
         soup = BeautifulSoup(res.text, 'html.parser')
         hidden_inp = soup.find_all(attrs={"name": "sesskey"})
-        if len(hidden_inp) > 0 :
+        if len(hidden_inp) > 0:
             try:
                 chosen_inp = hidden_inp[0]
                 self.__apikey = chosen_inp.attrs['value']
                 return True
-            except :
+            except:
                 print('[!] Error parsing API key')
                 return False
-        else :
+        else:
             print('[!] Error parsing API key')
             return False
-        
-    def parseCourses(self, user) :
+
+    def parseCourses(self, user):
         """
         Parse all user courses.
 
@@ -291,17 +301,18 @@ class Web :
         user: User
             current user class object
         """
-        course_url = self.POST_URL['courses'].format(apikey = self.__apikey)
+        course_url = self.POST_URL['courses'].format(apikey=self.__apikey)
         course_data = self.POST_DATA['courses']
-        res = self.__session.post(self.BASE_DOMAIN.format(course_url), data = course_data)
-        
+        res = self.__session.post(
+            self.BASE_DOMAIN.format(course_url), data=course_data)
+
         try:
             resJson = json.loads(res.text)
 
             result = resJson[0]
             isError = result['error']
 
-            if not isError :
+            if not isError:
                 # Filter out only important data
                 data = result['data']
                 courses = data['courses']
@@ -314,12 +325,12 @@ class Web :
                 } for x in courses]
 
                 user.setAllCourses(courses)
-            else :
+            else:
                 print('[!] Error fetching courses data.')
         except ValueError:
             print('[!] Failed to decode the resulted json.')
 
-    def parseEvents(self, user, from_time, to_time) :
+    def parseEvents(self, user, from_time, to_time):
         """
         Parse all user events with range
         of 2 timestamps.
@@ -333,9 +344,11 @@ class Web :
         to_time: int
             timestamp of ending date
         """
-        event_url = self.POST_URL['events'].format(apikey = self.__apikey)
-        event_data = self.POST_DATA['events'].format(from_time = from_time, to_time = to_time)
-        res = self.__session.post(self.BASE_DOMAIN.format(event_url), data = event_data)
+        event_url = self.POST_URL['events'].format(apikey=self.__apikey)
+        event_data = self.POST_DATA['events'].format(
+            from_time=from_time, to_time=to_time)
+        res = self.__session.post(
+            self.BASE_DOMAIN.format(event_url), data=event_data)
 
         try:
             resJson = json.loads(res.text)
@@ -343,7 +356,7 @@ class Web :
             result = resJson[0]
             isError = result['error']
 
-            if not isError :
+            if not isError:
                 # Filter out only important data
                 data = result['data']
                 events = data['events']
@@ -355,86 +368,92 @@ class Web :
                 } for x in events]
 
                 user.setAllCourses(courses)
-            else :
+            else:
                 print('[!] Error fetching events data.')
         except ValueError:
             print('[!] Failed to decode the resulted json.')
 
-def ask_retry() :
+
+def ask_retry():
     retry = str(input('\r[#] Retry ? (y/n)'))
-    if retry == 'y' :
+    if retry == 'y':
         main()
-    elif retry == 'n' : 
+    elif retry == 'n':
         return
-    else :
+    else:
         ask_retry()
 
-def main() :
+
+def main():
     show('hello')
 
     username = str(input('\r[+] Input your username = '))
-    password = stdiomask.getpass(prompt='\r[+] Input your password = ', mask='●')
+    password = stdiomask.getpass(
+        prompt='\r[+] Input your password = ', mask='●')
 
     currentUser = User(username, password)
     sessionCookie = currentUser.generateSessionCookie()
 
-    if sessionCookie :
+    if sessionCookie:
         process = Web(sessionCookie)
-        
+
         print('[+] Parsing api key...')
 
-        if process.parseApiKey() :
+        if process.parseApiKey():
             logout = False
-            while not logout :
+            while not logout:
                 welcome(username, sessionCookie)
 
                 inp = show('menu')
-                if inp == 1 :
+                if inp == 1:
                     # Parse all courses
                     process.parseCourses(currentUser)
-                    
-                    if currentUser.getAllCourses() != None :
+
+                    if currentUser.getAllCourses() != None:
                         currentUser.printAllCourses()
 
-                elif inp == 2 :
+                elif inp == 2:
                     # Access one of the course
                     print('[+] access course')
 
-                elif inp == 3 :
+                elif inp == 3:
                     # Parse all my messages
-                    print('[+] This feature have not created yet (might even won\'t :v)')
+                    print(
+                        '[+] This feature have not created yet (might even won\'t :v)')
 
-                elif inp == 4 :
+                elif inp == 4:
                     # Parse all event in this month
-                    print('[+] This feature have not created yet [i still dont have the sample to parse :(]')
+                    print(
+                        '[+] This feature have not created yet [i still dont have the sample to parse :(]')
 
-                elif inp == 5 :
+                elif inp == 5:
                     # Logout current account
-                    if process.logout() :
+                    if process.logout():
                         logout = True
                         print('[+] Logout successfully')
-                    else :
+                    else:
                         print('[!] Logout failed...')
 
-                elif inp == 6 :
+                elif inp == 6:
                     # Exit the app
                     print('[#] Thanks for using this app :D')
                     break
 
-                else :
+                else:
                     # Input is out of range
                     print('[!] Wrong input...')
-                
+
                 pause()
-            else :
-                main() # User logout, back to login screen
-        else :
+            else:
+                main()  # User logout, back to login screen
+        else:
             # Couldn't parse the api key, terminate app
             print('[!] Try running the script again.')
             print('    If the problem persist, contact the creator.')
-    else :
+    else:
         # Couldn't log the user in, ask for retry
         ask_retry()
+
 
 if __name__ == "__main__":
     main()
