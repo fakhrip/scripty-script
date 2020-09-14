@@ -366,8 +366,6 @@ class Web:
                     'course_id': x['course']['id'],
                     'viewurl': x['viewurl'],
                 } for x in events]
-
-                user.setAllCourses(courses)
             else:
                 print('[!] Error fetching events data.')
         except ValueError:
