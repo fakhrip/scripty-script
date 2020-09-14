@@ -406,7 +406,7 @@ def main() :
 
                 elif inp == 4 :
                     # Parse all event in this month
-                    print('[+] parse events')
+                    print('[+] This feature have not created yet [i still dont have the sample to parse :(]')
 
                 elif inp == 5 :
                     # Logout current account
