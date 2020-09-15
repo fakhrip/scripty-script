@@ -186,6 +186,44 @@ class User:
                     i+1, data['fullname'], data['shortname'], data['coursecategory']), end='')
         print('\r\n===================================================================')
 
+    def printCourseDetail(self, course_id):
+        """Fancy print detail of selected course."""
+        TEMPLATE = """
+        \r {}. Title = {}
+        \r    Deskripsi =
+        \r{}
+        \r 
+        \r    Contents =
+        \r{}
+        """
+
+        selected_course = self.__courses[course_id]
+
+        print('\n\rCourse Fullname = {}'.format(selected_course['fullname']))
+
+        print('\r-------------------------------------------------------------------')
+        if len(selected_course['details']) <= 0:
+            print('[+] This course doesn\'t has any detail')
+        else:
+            for i, data in enumerate(selected_course['details']):
+                content_str = ''
+
+                for content in data['contents']:
+                    content_str += f"    | >> {content['text']} [ {content['link']} ] ({content['category']})"
+                    if content['mandatory']:
+                        content_str += f" |{'NOT COMPLETED' if content['isCompleted'] else 'COMPLETED' }|\n"
+                    else:
+                        content_str += '\n'
+
+                summary_str = ''
+
+                for summ in data['summary'].split('\n'):
+                    summary_str += f"    | {summ}\n"
+
+                print(TEMPLATE.format(
+                    i+1, data['topic'], summary_str, content_str), end='')
+        print('\r\n-------------------------------------------------------------------')
+
     def setAllCourses(self, courses):
         self.__courses = courses
 
@@ -562,7 +600,7 @@ def main():
                         pass
 
                     process.parseCourse(currentUser, course_id)
-                    print(currentUser.getAllCourses()[course_id].values())
+                    currentUser.printCourseDetail(course_id)
 
                 elif inp == 3:
                     # Parse all my messages
