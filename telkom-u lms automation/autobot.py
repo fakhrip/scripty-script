@@ -189,8 +189,8 @@ class User:
     def setAllCourses(self, courses):
         self.__courses = courses
 
-    def updateCourses(self, details):
-        self.__courses.update(details)
+    def updateCourses(self, course_id, details):
+        self.__courses[course_id].update(details)
 
     def getAllCourses(self):
         try:
@@ -423,7 +423,7 @@ class Web:
 
         # Update user courses with parsed details
         course_details = {'details': all_details}
-        user.updateCourses(course_details)
+        user.updateCourses(course_id, course_details)
 
     def parseCourses(self, user):
         """
@@ -552,14 +552,17 @@ def main():
 
                     courses = currentUser.getAllCourses()
                     currentUser.printAllCourses()
-                    course_id = int(
-                        input('\r[+] Choose course to parse (1 - {}) = '.format(len(courses)))) - 1
+                    
+                    try:
+                        course_id = int(
+                            input('\r[+] Choose course to parse (1 - {}) = '.format(len(courses)))) - 1
+                    except:
+                        print('[!] Wrong input...')
+                        print('    Choose only between 1 - {}'.format(len(courses)))
+                        pass
+
                     process.parseCourse(currentUser, course_id)
-                    print(currentUser.getAllCourses().values())
-                    # try:
-                    # except:
-                    #     print('[!] Wrong input...')
-                    #     print('    Choose only between 1 - {}'.format(len(courses)))
+                    print(currentUser.getAllCourses()[course_id].values())
 
                 elif inp == 3:
                     # Parse all my messages
