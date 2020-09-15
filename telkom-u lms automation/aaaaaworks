@@ -1,0 +1,13 @@
+>>> asd
+'<p dir="ltr" style="text-align: left;">Sebelum memulai perkuliahan pastikan kalian telah berdo\'a sesuai agama dan kepercayaan masing-masing.<br/><br/>Link untuk setiap pertemuan dapat diakses pada link dibawah ini.<br/><br/><h4><strong><a href="http://meet.google.com/gvh-gnpa-paw">&gt;&gt;LINK ROOM&lt;&lt;</a></strong></h4><br/></p>'
+>>> b = '>>LINK ROOM<<'
+>>> asd = str(summary.find(text=b).parent)
+>>> re.findall(r'<[^>]+>$', str(re.sub(b+'.*', '', asd)))
+['</a>']
+>>> re.findall(r'<[^>]+>', str(re.sub(b+'.*', '', asd)))
+['<a href="http://meet.google.com/gvh-gnpa-paw">', '</a>']
+>>> b = 'Link untuk setiap pertemuan dapat diakses pada link dibawah ini.'
+>>> asd = str(summary.find(text=b).parent)
+>>> re.findall(r'<[^>]+>', str(re.sub(b+'.*', '', asd)))
+['<p dir="ltr" style="text-align: left;">', '<br/>', '<br/>']
+>>> 

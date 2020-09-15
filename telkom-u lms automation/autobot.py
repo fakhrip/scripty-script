@@ -396,7 +396,7 @@ class Web:
 
             # Add contents if any
             contents = []
-            links = soup.find_all(attrs={"class": "activityinstance"})
+            links = section.find_all(attrs={"class": "activityinstance"})
             for link in links:
                 for category in self.GET_URL['course']['categories']:
                     href = link.a['href']
@@ -552,7 +552,7 @@ def main():
 
                     courses = currentUser.getAllCourses()
                     currentUser.printAllCourses()
-                    
+
                     try:
                         course_id = int(
                             input('\r[+] Choose course to parse (1 - {}) = '.format(len(courses)))) - 1
