@@ -331,7 +331,7 @@ class Web:
             # Add topic text if any
             try:
                 details['topic'] = section.find_all(
-                    attrs={'class': 'wdm-sectionname'})[0].div.a.string
+                    attrs={'class': 'wdm-sectionname'})[0].a.string
             except:
                 pass
 
