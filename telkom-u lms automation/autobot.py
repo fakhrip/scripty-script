@@ -12,6 +12,7 @@ import stdiomask
 import requests
 import json
 import os
+import re
 
 
 def hello():
@@ -188,8 +189,14 @@ class User:
     def setAllCourses(self, courses):
         self.__courses = courses
 
+    def updateCourses(self, details):
+        self.__courses.update(details)
+
     def getAllCourses(self):
-        return self.__courses
+        try:
+            return self.__courses
+        except:
+            return None
 
 
 class Web:
@@ -206,6 +213,10 @@ class Web:
     GET_URL = {
         'home': '/my',
         'logout': '/login/logout.php?sesskey={apikey}',
+        'course': {
+            'participants': '/user/index.php?id={course_id}&page={iteration}',
+            'categories': ['resource', 'url', 'forum', 'chat', 'discussion', 'assign', 'quiz']
+        }
     }
 
     POST_URL = {
@@ -292,6 +303,128 @@ class Web:
             print('[!] Error parsing API key')
             return False
 
+    def parseCourse(self, user, course_id):
+        """
+        Parse all data for corresonding course
+
+        Parameters
+        ----------
+        user: User
+            current user class object
+        course_id: int
+            id of the course that want to be parsed        
+        """
+        courses = user.getAllCourses()
+        selected_course = courses[course_id]
+
+        res = self.__session.get(selected_course['view_url'])
+        soup = BeautifulSoup(res.text, 'html.parser')
+
+        all_details = []
+
+        topics = soup.find_all(attrs={"class": "topics"})[0]
+        sections = topics.find_all('li', recursive=False)
+
+        for section in sections:
+            details = {}
+
+            # Add topic text if any
+            try:
+                details['topic'] = section.find_all(
+                    attrs={'class': 'wdm-sectionname'})[0].div.a.string
+            except:
+                pass
+
+            # Parse summary if any
+            try:
+                summary = section.find_all(
+                    attrs={'class': 'summary'})[0]
+                summ_text = str(summary.text)
+
+                result = ''
+                temp = ''
+
+                found = False
+                for pos, char in enumerate(summ_text):
+                    temp += char
+
+                    if summary.find(text=temp) != None:
+                        found = True
+                        if pos == len(summ_text)-1:
+                            result += temp
+
+                            try:
+                                parent = summary.find(text=temp).parent
+                                elements = re.findall(
+                                    r'<[^>]+>$', str(re.sub(temp + '.*', '', parent)))
+                                if '<a' in elements[-1]:
+                                    for element in elements[::-1]:
+                                        if 'href' in element:
+                                            soup = BeautifulSoup(
+                                                element, 'html.parser')
+                                            result += '[ ' + \
+                                                soup.a['href'] + ' ]'
+                                            break
+                            except:
+                                pass
+
+                    else:
+                        if found:
+                            result += temp[:-1] + '\n'
+
+                            try:
+                                parent = summary.find(text=temp[:-1]).parent
+                                elements = re.findall(
+                                    r'<[^>]+>$', str(re.sub(temp + '.*', '', parent)))
+                                if '<a' in elements[-1]:
+                                    for element in elements[::-1]:
+                                        if 'href' in element:
+                                            soup = BeautifulSoup(
+                                                element, 'html.parser')
+                                            result += '[ ' + \
+                                                soup.a['href'] + ' ]'
+                                            break
+                            except:
+                                pass
+
+                            temp = temp[len(temp)-1:]
+                            found = False
+
+                details['summary'] = result
+            except:
+                pass
+
+            # Add contents if any
+            contents = []
+            links = soup.find_all(attrs={"class": "activityinstance"})
+            for link in links:
+                for category in self.GET_URL['course']['categories']:
+                    href = link.a['href']
+                    text = link.a.span.contents[0]
+                    sibling = link.find_next_sibling(
+                        attrs={"class": "actions"})
+                    if category in href:
+                        content = {
+                            'text': text,
+                            'link': href,
+                            'category': category,
+                            'mandatory': True if sibling != None else False,
+                        }
+
+                        try:
+                            content['isCompleted'] = False if 'Not completed:' in sibling.img['alt'] else True
+                        except:
+                            pass
+
+                        contents.append(content)
+
+            details['contents'] = contents
+            all_details.append(details)
+
+        # Update user courses with parsed details
+        course_details = {'details': all_details}
+        user.updateCourses(course_details)
+
     def parseCourses(self, user):
         """
         Parse all user courses.
@@ -320,7 +453,7 @@ class Web:
                     'fullname': x['fullname'].replace('\n', ' '),
                     'shortname': x['shortname'],
                     'course_id': x['id'],
-                    'viewurl': x['viewurl'],
+                    'view_url': x['viewurl'],
                     'coursecategory': x['coursecategory']
                 } for x in courses]
 
@@ -364,7 +497,7 @@ class Web:
                     'id': x['id'],
                     'name': x['name'],
                     'course_id': x['course']['id'],
-                    'viewurl': x['viewurl'],
+                    'view_url': x['viewurl'],
                 } for x in events]
             else:
                 print('[!] Error fetching events data.')
@@ -405,6 +538,7 @@ def main():
                 inp = show('menu')
                 if inp == 1:
                     # Parse all courses
+                    print('[+] Parsing all courses...')
                     process.parseCourses(currentUser)
 
                     if currentUser.getAllCourses() != None:
@@ -412,7 +546,20 @@ def main():
 
                 elif inp == 2:
                     # Access one of the course
-                    print('[+] access course')
+                    if currentUser.getAllCourses() == None:
+                        print('[+] Parsing all courses...')
+                        process.parseCourses(currentUser)
+
+                    courses = currentUser.getAllCourses()
+                    currentUser.printAllCourses()
+                    course_id = int(
+                        input('\r[+] Choose course to parse (1 - {}) = '.format(len(courses)))) - 1
+                    process.parseCourse(currentUser, course_id)
+                    print(currentUser.getAllCourses().values())
+                    # try:
+                    # except:
+                    #     print('[!] Wrong input...')
+                    #     print('    Choose only between 1 - {}'.format(len(courses)))
 
                 elif inp == 3:
                     # Parse all my messages
