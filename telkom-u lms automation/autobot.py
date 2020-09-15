@@ -207,21 +207,24 @@ class User:
         else:
             for i, data in enumerate(selected_course['details']):
                 content_str = ''
-
-                for content in data['contents']:
-                    content_str += f"    | >> {content['text']} [ {content['link']} ] ({content['category']})"
-                    if content['mandatory']:
-                        content_str += f" |{'NOT COMPLETED' if content['isCompleted'] else 'COMPLETED' }|\n"
-                    else:
-                        content_str += '\n'
-
                 summary_str = ''
 
-                for summ in data['summary'].split('\n'):
-                    summary_str += f"    | {summ}\n"
+                if data['contents'] != None and data['contents'] != '' and len(data['contents']) > 0:
+                    for content in data['contents']:
+                        content_str += f"    | >> {content['text']} [ {content['link']} ] ({content['category']})"
+                        if content['mandatory']:
+                            content_str += f" |{'COMPLETED' if content['isCompleted'] else 'NOT COMPLETED' }|\n"
+                        else:
+                            content_str += '\n'
 
-                print(TEMPLATE.format(
-                    i+1, data['topic'], summary_str, content_str), end='')
+                    if data['summary'] != None and data['summary'] != '' and len(data['summary'].split('\n')) > 0:
+                        for summ in data['summary'].split('\n'):
+                            summary_str += f"    | {summ}\n"
+                    else:
+                        summary_str = '    | No description for this topic'
+
+                    print(TEMPLATE.format(
+                        i+1, data['topic'], summary_str, content_str), end='')
         print('\r\n-------------------------------------------------------------------')
 
     def setAllCourses(self, courses):
