@@ -86,11 +86,11 @@ And also make sure you know how to reproduce the error, because otherwise i cant
 
 This is some of my plan for the future work (urgency level goes down the list) : 
 
-[ ] Complete all the features (chat not included)
-[ ] Add local DB system to remember user account, manage all data, and provide some fancy statistics stuff
-[ ] Add notification system
-[ ] Add logging system so its easier to trace if someone else using this got a bug
-[ ] Change all the frontend to a website instead of simple terminal stuff
+- [ ] Complete all the features (chat not included)  
+- [ ] Add local DB system to remember user account, manage all data, and provide some fancy statistics stuff  
+- [ ] Add notification system  
+- [ ] Add logging system so its easier to trace if someone else using this got a bug  
+- [ ] Change all the frontend to a website instead of simple terminal stuff
 
 ----
 
